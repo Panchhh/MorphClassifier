@@ -17,10 +17,25 @@ def dataset_iterator(path, data_type):
             yield {
                 'path': filepath,
                 'relative_path': os.path.relpath(filepath, root_path),
+                'full_filename': file,
                 'filename': filename,
                 'data': cv2.imread(file) if data_type == 'image' else np.load(file),
                 'class': ('morphed' if 'morph' in filename else 'bonafide')
             }
+
+
+def filter_dataset(dataset, data_filter=lambda x: True, filename_filter=lambda x: True):
+    """
+    Filter dataset based on data and/or filename.
+    :param dataset: Input dataset.
+    :param data_filter: Filter to apply on data. (e.g. data dimensionality)
+    :param filename_filter: Filter to apply on filename.
+    :return: a tuple containing data and label vectors.
+    """
+    # TODO: maybe filter in a lazy way but data must be loaded in order to train classifier
+    filtered_x, filtered_y = zip(
+        *[(f['data'], f['class']) for f in dataset if (data_filter(f['data']) and filename_filter(f['full_filename']))])
+    return np.array(filtered_x), np.array(filtered_y)
 
 
 def load_image_dataset(path):
@@ -49,13 +64,13 @@ def load_dataset(path, data_type):
 def save_data(path, data, data_field, data_type):
     filepath = os.path.join(path, data['relative_path'])
     Path(filepath).mkdir(parents=True, exist_ok=True)
-    filename = Path(os.path.join(filepath, data['filename']))
+    filename_path = Path(os.path.join(filepath, data['filename']))
     if data_type == 'image':
-        filename = filename.with_suffix('.png')
-        cv2.imwrite(filename, data['data'])
+        filename_path = filename_path.with_suffix('.png')
+        cv2.imwrite(str(filename_path), data[data_field])
     elif data_type == 'feature':
-        filename = filename.with_suffix('.npy')
-        np.save(filename, data[data_field])
+        filename_path = filename_path.with_suffix('.npy')
+        np.save(filename_path, data[data_field])
 
 
 def transform_dataset(input_path, output_path, function, input_data_type, output_data_type):
