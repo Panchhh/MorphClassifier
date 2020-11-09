@@ -32,7 +32,6 @@ def filter_dataset(dataset, data_filter=lambda x: True, filename_filter=lambda x
     :param filename_filter: Filter to apply on filename.
     :return: a tuple containing data and label vectors.
     """
-    # TODO: maybe filter in a lazy way but data must be loaded in order to train classifier
     filtered_x, filtered_y = zip(
         *[(f['data'], f['class']) for f in dataset if (data_filter(f['data']) and filename_filter(f['full_filename']))])
     return np.array(filtered_x), np.array(filtered_y)
@@ -42,23 +41,16 @@ def load_image_dataset(path):
     """Load an image dataset in memory.
 
         :param str path: Starting root path.
-        :return: the dataset. Each element it's a dictionary containing 'path', 'relative_path', 'filename', 'data', 'class' """
-    return load_dataset(path, data_type='image')
+        :return: the image dataset iterator. Each element it's a dictionary containing 'path', 'relative_path', 'filename', 'data', 'class' """
+    return dataset_iterator(path, data_type='image')
 
 
 def load_feature_dataset(path):
     """Load a feature dataset in memory.
 
         :param str path: Starting root path.
-        :return: the dataset. Each element it's a dictionary containing 'path', 'relative_path', 'filename', 'data', 'class' """
-    return load_dataset(path, data_type='feature')
-
-
-def load_dataset(path, data_type):
-    dataset = []
-    for data in dataset_iterator(path, data_type):
-        dataset.append(data)
-    return dataset
+        :return: the image dataset iterator. Each element it's a dictionary containing 'path', 'relative_path', 'filename', 'data', 'class' """
+    return dataset_iterator(path, data_type='feature')
 
 
 def save_data(path, data, data_field, data_type):
