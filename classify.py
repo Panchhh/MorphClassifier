@@ -4,19 +4,16 @@ from sklearn.neural_network import MLPClassifier
 
 from dataset import single_image_dataset
 from sklearn import svm
-import re
 from score import evaluate_classifiers
+from files import train_data_path, test_data_path, single_image_filename_train_filter, single_image_filename_test_filter
 
-feature_name = "HOG224"
-train_features_path = r'C:\Users\emanu\OneDrive\Desktop\UniLM\Tesi\DATASET\{0}\dlib20\PMDB_cropped_20'.format(feature_name)
-test_features_path = r'C:\Users\emanu\OneDrive\Desktop\UniLM\Tesi\DATASET\{0}\dlib20\MorphDB_cropped_20'.format(feature_name)
-
-filename_train_filter = (lambda fullname: bool(re.search('morph.*0.55|.*.TestImages.*', fullname)))
-filename_test_filter = (lambda fullname: bool(re.search('.*_D.*', fullname)))
+feature_name = "SIFT224_200"
 
 print("Loading features...")
-X_train, y_train = single_image_dataset(train_features_path, data_type='feature', filename_filter=filename_train_filter)
-X_test, y_test = single_image_dataset(test_features_path, data_type='feature', filename_filter=filename_test_filter)
+X_train, y_train = single_image_dataset(train_data_path(feature_name), data_type='feature',
+                                        filename_filter=single_image_filename_train_filter)
+X_test, y_test = single_image_dataset(test_data_path(feature_name), data_type='feature',
+                                      filename_filter=single_image_filename_test_filter)
 print("Features loaded...")
 
 

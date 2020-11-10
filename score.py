@@ -31,19 +31,19 @@ def evaluate_classifiers(x_train, y_train, x_test, y_test, folder_name, classifi
     _save_file(r"scores\{0}\summary.score".format(folder_name), results)
 
 
-def _save_score(clf, folder_name, X_test, y_test):
+def _save_score(clf, folder_name, x_test, y_test):
     print("Testing with {0} new elements".format(y_test.size))
-    genuine_error_score = []
+    genuine_success_score = []
     impostor_success_score = []
-    morph_class_index = np.where(clf.classes_ == "morphed")[0]
-    for i, x in enumerate(X_test):
-        morph_proba = clf.predict_proba(x.reshape(1, -1))[:, morph_class_index].item()
+    morph_class_index = np.where(clf.classes_ == "bonafide")[0]
+    for i, x in enumerate(x_test):
+        morph_prob = clf.predict_proba(x.reshape(1, -1))[:, morph_class_index].item()
         if y_test[i] == "bonafide":
-            genuine_error_score.append(morph_proba)
+            genuine_success_score.append(morph_prob)
         else:
-            impostor_success_score.append(morph_proba)
+            impostor_success_score.append(morph_prob)
 
-    _save_file(r"scores\{0}\{1}\{1}_bonafide.score".format(folder_name, clf.__class__.__name__), genuine_error_score)
+    _save_file(r"scores\{0}\{1}\{1}_bonafide.score".format(folder_name, clf.__class__.__name__), genuine_success_score)
     _save_file(r"scores\{0}\{1}\{1}_impostor.score".format(folder_name, clf.__class__.__name__), impostor_success_score)
 
 
