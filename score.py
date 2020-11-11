@@ -17,10 +17,10 @@ def evaluate_classifiers(x_train, y_train, x_test, y_test, folder_name, classifi
     """
     results = []
     for clf in classifiers:
-        print("Training {0} with {1} elements".format(clf.__class__.__name__, y_train.size))
+        print("Training {0} with {1} elements...".format(clf.__class__.__name__, y_train.size), end="", flush=True)
         start = time.clock()
         clf.fit(X=x_train, y=y_train)
-        print("Training complete.")
+        print("Done.", flush=True)
         seconds = time.clock() - start
         results.append({
             "classifier": clf.__class__.__name__,
@@ -32,7 +32,7 @@ def evaluate_classifiers(x_train, y_train, x_test, y_test, folder_name, classifi
 
 
 def _save_score(clf, folder_name, x_test, y_test):
-    print("Testing with {0} new elements".format(y_test.size))
+    print("Testing with {0} new elements...".format(y_test.size), end="", flush=True)
     genuine_success_score = []
     impostor_success_score = []
     morph_class_index = np.where(clf.classes_ == "bonafide")[0]
@@ -42,7 +42,7 @@ def _save_score(clf, folder_name, x_test, y_test):
             genuine_success_score.append(morph_prob)
         else:
             impostor_success_score.append(morph_prob)
-
+    print("Done", flush=True)
     _save_file(r"scores\{0}\{1}\{1}_bonafide.score".format(folder_name, clf.__class__.__name__), genuine_success_score)
     _save_file(r"scores\{0}\{1}\{1}_impostor.score".format(folder_name, clf.__class__.__name__), impostor_success_score)
 
