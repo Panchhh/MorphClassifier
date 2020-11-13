@@ -3,10 +3,14 @@ import time
 
 from dataset import transform_dataset, single_image_dataset
 from files import transformation_root_path, train_data_path
-from transformation import lbp_extractor, resizer, Sift, Surf, hog_extractor
+from transformation import lbp_extractor, resizer, Sift, Surf, hog_extractor, lbp_hist_extractor
 
 lbp_default = lambda: lbp_extractor(1, 8, 'uniform')
+lbp_big = lambda: lbp_extractor(3, 24, 'uniform')
 hog_default = lambda: hog_extractor(8, (16, 16), (1, 1), True)
+
+lbp_hist_default = lambda: lbp_hist_extractor(1, 8, 'uniform')
+lbp_hist_big = lambda: lbp_hist_extractor(3, 24, 'uniform')
 
 
 def sift(feature_name, dimensionality):
@@ -32,7 +36,13 @@ simple_transformations = [
         "semantic": "LBP",
         "transformations": [
             ("FM224", lbp_default, "LBP224"),
-            ("FM320", lbp_default, "LBP320")
+            ("FM320", lbp_default, "LBP320"),
+            ("FM224", lbp_big, "LBP224_25"),
+            ("FM320", lbp_big, "LBP320_25"),
+            ("FM224", lbp_hist_default, "LBPH224"),
+            ("FM320", lbp_hist_default, "LBPH320"),
+            ("FM224", lbp_hist_big, "LBPH224_25"),
+            ("FM320", lbp_hist_big, "LBPH320_25")
         ],
         "types": ("image", "feature")
     },
@@ -51,7 +61,8 @@ bag_of_word_transformation = [
         "semantic": "SIFT",
         "transformations": [
             ("FM224", sift("FM224", 200), "SIFT224_200"),
-            ("FM320", sift("FM320", 200), "SIFT320_200")
+            ("FM224", sift("FM224", 500), "SIFT224_500"),
+            ("FM320", sift("FM320", 200), "SIFT320_200"),
         ],
         "types": ("image", "feature")
     },
@@ -59,6 +70,7 @@ bag_of_word_transformation = [
         "semantic": "SURF",
         "transformations": [
             ("FM224", surf("FM224", 200), "SURF224_200"),
+            ("FM224", surf("FM224", 500), "SURF224_500"),
             ("FM320", surf("FM320", 200), "SURF320_200")
         ],
         "types": ("image", "feature")

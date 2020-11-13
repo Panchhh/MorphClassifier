@@ -9,6 +9,13 @@ from abc import ABC
 def hog_extractor(orientations, pixels_per_cell, cells_per_block, multichannel):
     """
     Image to hog transformation function.
+
+    :param orientations: HOG orientations
+    :param pixels_per_cell: HOG pixels_per_cell
+    :param cells_per_block: HOG cells_per_block
+    :param multichannel: HOG multichannel
+
+    :return: a function from image to HOG one-dimensional vector.
     """
     return lambda data: hog(data, orientations=orientations, pixels_per_cell=pixels_per_cell,
                             cells_per_block=cells_per_block, multichannel=multichannel)
@@ -17,9 +24,34 @@ def hog_extractor(orientations, pixels_per_cell, cells_per_block, multichannel):
 def lbp_extractor(radius, n_points, method):
     """
     Image to lbp transformation function. Image is converted to grayscale before extracting lbp features.
+
+    :param radius: LBP radius
+    :param n_points: LBP n_points
+    :param method: LBP method
+
+    :return: a function from image to LBP image reshaped in a one-dimensional vector.
     """
     return compose(lambda data: np.reshape(local_binary_pattern(data, n_points, radius, method), -1),
                    cvt_color(cv2.COLOR_BGR2GRAY))
+
+
+def lbp_hist_extractor(radius, n_points, method):
+    """
+    Image to LBP histogram transformation function. Image is converted to grayscale before extracting lbp features.
+    The Histogram is quantized on the basis of the parameters radius and n_points.
+
+    :param radius: LBP radius
+    :param n_points: LBP n_points
+    :param method: LBP method
+
+    :return: a function from image to LBP histogram.
+    """
+    def lbp_hist(data):
+        lbp = local_binary_pattern(data, n_points, radius, method)
+        n_bins = int(lbp.max() + 1)
+        hist, _ = np.histogram(lbp, density=True, bins=n_bins, range=(0, n_bins))
+        return hist
+    return compose(lambda data: lbp_hist(data), cvt_color(cv2.COLOR_BGR2GRAY))
 
 
 def cvt_color(code):

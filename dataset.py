@@ -2,6 +2,7 @@ import os
 import cv2
 from pathlib import Path
 import numpy as np
+from functools import reduce
 
 
 def transform_dataset(input_path, output_path, function, input_data_type, output_data_type):
@@ -35,6 +36,17 @@ def single_image_dataset(path, data_type, data_filter=lambda x: True, filename_f
     return np.array(filtered_x), np.array(filtered_y)
 
 
+def single_image_datasets(paths, data_type, data_filter=lambda x: True, filename_filter=lambda x: True):
+    """
+    A single image dataset loaded in memory which concatenates which concatenates data from multiple paths.
+    """
+    datasets = []
+    for path in paths:
+        datasets.append(single_image_dataset(path, data_type, data_filter, filename_filter))
+
+    return reduce(_concatenate_datasets, datasets)
+
+
 def differential_dataset(couples_files, dataset_folder, data_type, operation):
     """
     A differential dataset loaded in memory. Data pairs are taken from 'couples_files' list. Pairs are combined through the function 'operation' (e.g difference).
@@ -49,6 +61,23 @@ def differential_dataset(couples_files, dataset_folder, data_type, operation):
     dataset = _differential_dataset_iterator(couples_files, dataset_folder, data_type, operation)
     x, y = zip(*[(f['data'], f['class']) for f in dataset])
     return np.array(x), np.array(y)
+
+
+def differential_datasets(couples_files, dataset_folders, data_type, operation):
+    """
+    A differential dataset loaded in memory which concatenates which concatenates data from multiple datasets.
+    """
+    datasets = []
+    for dataset_folder in dataset_folders:
+        datasets.append(differential_dataset(couples_files, dataset_folder, data_type, operation))
+
+    return reduce(_concatenate_datasets, datasets)
+
+
+def _concatenate_datasets(dataset1, dataset2):
+    x1, y = dataset1
+    x2, _ = dataset2
+    return np.concatenate((x1, x2), axis=1), y
 
 
 def _dataset_iterator(path, data_type):
