@@ -15,8 +15,12 @@ def transform_dataset(input_path, output_path, function, input_data_type, output
         :param str output_data_type: Output data type. 'image' for images, 'feature' for numpy vectors
         """
     for data in _dataset_iterator(input_path, input_data_type):
-        data['output'] = function(data['data'])
-        _save_data(output_path, data, 'output', output_data_type)
+        try:
+            data['output'] = function(data['data'])
+            _save_data(output_path, data, 'output', output_data_type)
+        except Exception:
+            print(Exception)
+            print("ERROR: transformation of {0}".format(output_path))
 
 
 def single_image_dataset(path, data_type, data_filter=lambda x: True, filename_filter=lambda x: True):
@@ -65,7 +69,7 @@ def differential_dataset(couples_files, dataset_folder, data_type, operation):
 
 def differential_datasets(couples_files, dataset_folders, data_type, operation):
     """
-    A differential dataset loaded in memory which concatenates which concatenates data from multiple datasets.
+    A differential dataset loaded in memory which concatenates data from multiple datasets.
     """
     datasets = []
     for dataset_folder in dataset_folders:
@@ -84,15 +88,17 @@ def _dataset_iterator(path, data_type):
     root_path = path
     for filepath, _, filenames in os.walk(path):
         for filename in filenames:
-            file = os.path.join(filepath, filename)
-            yield {
-                'path': filepath,
-                'relative_path': os.path.relpath(filepath, root_path),
-                'full_filename': file,
-                'filename': filename,
-                'data': _load_file(file, data_type),
-                'class': _compute_class(filename)
-            }
+            extension = Path(filename).suffix
+            if extension == '.png' or extension == '.npy' or extension == '.jpg':
+                file = os.path.join(filepath, filename)
+                yield {
+                    'path': filepath,
+                    'relative_path': os.path.relpath(filepath, root_path),
+                    'full_filename': file,
+                    'filename': filename,
+                    'data': _load_file(file, data_type),
+                    'class': _compute_class(filename)
+                }
 
 
 def _differential_dataset_iterator(couples_files, dataset_folder, data_type, operation):
